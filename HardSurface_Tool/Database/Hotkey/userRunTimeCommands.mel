@@ -1,0 +1,296 @@
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.combine_object()")
+	HS_Combine;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.detach_object()")
+	HS_Detach;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.clone_object()")
+	HS_Clone;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("DeleteAllHistory;")
+	HS_DeleteHistory;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("FreezeTransformations;")
+	HS_FreezeTransforms;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "mel"
+	-command ("ShowAll;\nhide `listCameras`;")
+	HS_UnhideAll;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.align_circle_vertices()")
+	HS_Alignment;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.xray_selected_objects()")
+	HS_XraySelected;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.wireframe_switcher()")
+	HS_Wireframe;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.split_polygon()")
+	HS_SplitPolygon;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.smart_extend()")
+	HS_Extend;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.smart_fill_hole()")
+	HS_FillHole;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Normal_Tools import NormalTools_Main\nNormalTools_Main.toggle_selected_normal()")
+	HS_ToggleVertexNormal;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.select_dot_loop()")
+	SelectDotLoop;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.select_dot_ring()")
+	SelectDotRing;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.select_similar()")
+	SelectSimilarObject;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.revolve_Z()")
+	RevolveZ;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.revolve_Y()")
+	RevolveY;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.revolve_X()")
+	RevolveX;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.mirror_merge_Z_neg()")
+	MirrorMergeZ_;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.mirror_merge_X_neg()")
+	MirrorMergeX_;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.mirror_merge_Y_neg()")
+	MirrorMergeY_;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.mirror_merge_Z_pos()")
+	MirrorMergeZ;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.mirror_merge_Y_pos()")
+	MirrorMergeY;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.mirror_merge_X_pos()")
+	MirrorMergeX;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.mirror_instance_Z()")
+	MirrorInstanceZ;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.mirror_instance_Y()")
+	MirrorInstanceY;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.mirror_instance_X()")
+	MirrorInstanceX;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.mirror_Z()")
+	MirrorZ;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.mirror_Y()")
+	MirrorY;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.mirror_X()")
+	MirrorX;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.flip_Z()")
+	FlipZ;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.flip_Y()")
+	FlipY;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Mirror_Tools import MirrorTool\nMirrorTool.flip_X()")
+	FlipX;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.reset_object_rotation()")
+	ResetObjectRotation;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.unbevel_v2()")
+	UnbevelAllEdge;
+
+runTimeCommand
+	-annotation ""
+	-category "Custom Scripts.HardSurface Tool"
+	-hotkeyCtx ""
+	-commandLanguage "python"
+	-command ("from Model_Tools import ModelTool\nModelTool.unbevel()")
+	UnbevelEdge;
+

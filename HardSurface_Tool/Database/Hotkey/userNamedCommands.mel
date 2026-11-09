@@ -1,0 +1,222 @@
+nameCommand
+	-annotation "HS_CombineNameCommand"
+	-sourceType "mel"
+	-command ("HS_Combine")
+	HS_CombineNameCommand;
+
+nameCommand
+	-annotation "HS_DetachNameCommand"
+	-sourceType "mel"
+	-command ("HS_Detach")
+	HS_DetachNameCommand;
+
+nameCommand
+	-annotation "HS_CloneNameCommand"
+	-sourceType "mel"
+	-command ("HS_Clone")
+	HS_CloneNameCommand;
+
+nameCommand
+	-annotation "HS_DeleteHistoryNameCommand"
+	-sourceType "mel"
+	-command ("HS_DeleteHistory")
+	HS_DeleteHistoryNameCommand;
+
+nameCommand
+	-annotation "HS_FreezeTransformsNameCommand"
+	-sourceType "mel"
+	-command ("HS_FreezeTransforms")
+	HS_FreezeTransformsNameCommand;
+
+nameCommand
+	-annotation "HS_UnhideAllNameCommand"
+	-sourceType "mel"
+	-command ("HS_UnhideAll")
+	HS_UnhideAllNameCommand;
+
+nameCommand
+	-annotation "HS_AlignmentNameCommand"
+	-sourceType "mel"
+	-command ("HS_Alignment")
+	HS_AlignmentNameCommand;
+
+nameCommand
+	-annotation "HS_XraySelectedNameCommand"
+	-sourceType "mel"
+	-command ("HS_XraySelected")
+	HS_XraySelectedNameCommand;
+
+nameCommand
+	-annotation "HS_WireframeNameCommand"
+	-sourceType "mel"
+	-command ("HS_Wireframe")
+	HS_WireframeNameCommand;
+
+nameCommand
+	-annotation "SelectDotLoopNameCommand"
+	-sourceType "mel"
+	-command ("SelectDotLoop")
+	SelectDotLoopNameCommand;
+
+nameCommand
+	-annotation "SelectDotRingNameCommand"
+	-sourceType "mel"
+	-command ("SelectDotRing")
+	SelectDotRingNameCommand;
+
+nameCommand
+	-annotation "SelectSimilarObjectNameCommand"
+	-sourceType "mel"
+	-command ("SelectSimilarObject")
+	SelectSimilarObjectNameCommand;
+
+nameCommand
+	-annotation "HS_UnbevelAllEdgeNameCommand"
+	-sourceType "mel"
+	-command ("UnbevelAllEdge")
+	HS_UnbevelAllEdgeNameCommand;
+
+nameCommand
+	-annotation "HS_UnbevelEdgeNameCommand"
+	-sourceType "mel"
+	-command ("UnbevelEdge")
+	HS_UnbevelEdgeNameCommand;
+
+nameCommand
+	-annotation "HS_SplitPolygonNameCommand"
+	-sourceType "mel"
+	-command ("HS_SplitPolygon")
+	HS_SplitPolygonNameCommand;
+
+nameCommand
+	-annotation "HS_ExtendNameCommand"
+	-sourceType "mel"
+	-command ("HS_Extend")
+	HS_ExtendNameCommand;
+
+nameCommand
+	-annotation "HS_FillHoleNameCommand"
+	-sourceType "mel"
+	-command ("HS_FillHole")
+	HS_FillHoleNameCommand;
+
+nameCommand
+	-annotation "HS_ResetObjectRotationNameCommand"
+	-sourceType "mel"
+	-command ("ResetObjectRotation")
+	HS_ResetObjectRotationNameCommand;
+
+nameCommand
+	-annotation "HS_FlipXNameCommand"
+	-sourceType "mel"
+	-command ("FlipX")
+	HS_FlipXNameCommand;
+
+nameCommand
+	-annotation "HS_FlipYNameCommand"
+	-sourceType "mel"
+	-command ("FlipY")
+	HS_FlipYNameCommand;
+
+nameCommand
+	-annotation "HS_FlipZNameCommand"
+	-sourceType "mel"
+	-command ("FlipZ")
+	HS_FlipZNameCommand;
+
+nameCommand
+	-annotation "HS_MirrorXNameCommand"
+	-sourceType "mel"
+	-command ("MirrorX")
+	HS_MirrorXNameCommand;
+
+nameCommand
+	-annotation "HS_MirrorZNameCommand"
+	-sourceType "mel"
+	-command ("MirrorZ")
+	HS_MirrorZNameCommand;
+
+nameCommand
+	-annotation "HS_MirrorYNameCommand"
+	-sourceType "mel"
+	-command ("MirrorY")
+	HS_MirrorYNameCommand;
+
+nameCommand
+	-annotation "HS_MirrorInstanceXNameCommand"
+	-sourceType "mel"
+	-command ("MirrorInstanceX")
+	HS_MirrorInstanceXNameCommand;
+
+nameCommand
+	-annotation "HS_MirrorInstanceYNameCommand"
+	-sourceType "mel"
+	-command ("MirrorInstanceY")
+	HS_MirrorInstanceYNameCommand;
+
+nameCommand
+	-annotation "HS_MirrorInstanceZNameCommand"
+	-sourceType "mel"
+	-command ("MirrorInstanceZ")
+	HS_MirrorInstanceZNameCommand;
+
+nameCommand
+	-annotation "HS_MirrorMergeX_PosNameCommand"
+	-sourceType "mel"
+	-command ("MirrorMergeX")
+	HS_MirrorMergeX_PosNameCommand;
+
+nameCommand
+	-annotation "HS_MirrorMergeY_PosNameCommand"
+	-sourceType "mel"
+	-command ("MirrorMergeY")
+	HS_MirrorMergeY_PosNameCommand;
+
+nameCommand
+	-annotation "HS_MirrorMergeZ_PosNameCommand"
+	-sourceType "mel"
+	-command ("MirrorMergeZ")
+	HS_MirrorMergeZ_PosNameCommand;
+
+nameCommand
+	-annotation "HS_MirrorMergeX_NegNameCommand"
+	-sourceType "mel"
+	-command ("MirrorMergeX_")
+	HS_MirrorMergeX_NegNameCommand;
+
+nameCommand
+	-annotation "HS_MirrorMergeY_NegNameCommand"
+	-sourceType "mel"
+	-command ("MirrorMergeY_")
+	HS_MirrorMergeY_NegNameCommand;
+
+nameCommand
+	-annotation "HS_MirrorMergeZ_NegNameCommand"
+	-sourceType "mel"
+	-command ("MirrorMergeZ_")
+	HS_MirrorMergeZ_NegNameCommand;
+
+nameCommand
+	-annotation "HS_RevolveXNameCommand"
+	-sourceType "mel"
+	-command ("RevolveX")
+	HS_RevolveXNameCommand;
+
+nameCommand
+	-annotation "HS_RevolveYNameCommand"
+	-sourceType "mel"
+	-command ("RevolveY")
+	HS_RevolveYNameCommand;
+
+nameCommand
+	-annotation "HS_RevolveZNameCommand"
+	-sourceType "mel"
+	-command ("RevolveZ")
+	HS_RevolveZNameCommand;
+
+nameCommand
+	-annotation "HS_ToggleVertexNormalNameCommand"
+	-sourceType "mel"
+	-command ("HS_ToggleVertexNormal")
+	HS_ToggleVertexNormalNameCommand;
+

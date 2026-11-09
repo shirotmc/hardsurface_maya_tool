@@ -1,0 +1,10 @@
+{
+	"repo": "OWNER/REPO",
+	"asset_name": "HSTool.zip",
+	"token_env": "HSTOOL_GITHUB_TOKEN",
+	"check_interval_hours": 12,
+	"auto_check_on_startup": true,
+	"preserve": [
+		"HardSurface_Tool/Database/Setting/HardSurfaceTool_Setting.json"
+	]
+}
