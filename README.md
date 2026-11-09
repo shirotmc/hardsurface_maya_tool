@@ -119,25 +119,6 @@ HSTool/
   Updater/                Updater online + build_release.py
   HardSurface_Tool/       Cửa sổ chính, Database (setting, hotkey, library, document)
   Check_Tools/ Model_Tools/ Mirror_Tools/ Normal_Tools/ UV_Tools/ BakeSet_Tools/
-  hs_rebevel_maya.py      Công cụ ReBevel
-```
-
-## Phát hành phiên bản mới (dành cho người bảo trì)
-
-```
-python Updater/build_release.py 2026.12
-```
-
-1. Chạy lệnh trên trong folder HSTool. Script cập nhật `version.json`, tạo `dist/HSTool.zip` và `dist/HSTool.zip.sha256`.
-2. Commit và push mã nguồn.
-3. Tạo GitHub Release có tag `v2026.12`, đính kèm hai file trong `dist/`, rồi Publish (không chọn pre-release hay draft).
-
-Tag phải lớn hơn phiên bản người dùng đang có thì updater mới báo có bản mới.
-
-Hoặc dùng GitHub CLI:
-
-```
-gh release create v2026.12 dist/HSTool.zip dist/HSTool.zip.sha256 --title "HSTool 2026.12" --notes "Nội dung thay đổi"
 ```
 
 ## Liên hệ
