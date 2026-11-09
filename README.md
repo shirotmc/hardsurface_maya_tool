@@ -142,4 +142,4 @@ gh release create v2026.12 dist/HSTool.zip dist/HSTool.zip.sha256 --title "HSToo
 
 ## Liên hệ
 
-Canh Tran (canhtran@virtuosgames.com)
+Canh Tran (shiro.tmc@gmail.com)
