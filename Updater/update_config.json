@@ -1,5 +1,5 @@
 {
-	"repo": "OWNER/REPO",
+	"repo": "shirotmc/hardsurface_maya_tool",
 	"asset_name": "HSTool.zip",
 	"token_env": "HSTOOL_GITHUB_TOKEN",
 	"check_interval_hours": 12,
