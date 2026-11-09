@@ -1,66 +1,97 @@
-import os
-import maya.OpenMayaMPx as OpenMayaMPx
-import maya.cmds as cmds
-
-usd = cmds.internalVar(usd=True)
-# module_path = usd + '/module_path.txt'
-# with open(module_path, 'r') as f:
-#     mainModulePath = f.readlines()[0]
-
-commandName = 'create_toolset'
-try:
-    from importlib import reload
-except:
-    pass
-    
-import sys
-# HSTool root = parent of this plug-ins folder (self-locating, no fixed install path)
-HSTOOL_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__))).replace("\\", "/")
-if HSTOOL_ROOT not in sys.path:
-    sys.path.insert(0, HSTOOL_ROOT)
-
-command = """
-from HardSurface_Tool import HardSurfaceTool
-try:
-    from importlib import reload
-except:
-    pass
-
-reload(HardSurfaceTool)
-HardSurfaceTool.GUI()
+# -*- coding: utf-8 -*-
 """
+HardSurface Toolset plug-in: creates the "HardSurface_Tools" menu in Maya's main menu bar.
 
-def createToolset():
-    # import site
+Maya may execute plug-in files without defining __file__, so the HSTool root is resolved
+in several ways (see _resolve_root). Uses only maya.api.OpenMaya (API 2.0) for MFnPlugin.loadPath.
+"""
+import os
+import sys
 
-    # site.addsitedir(mainModulePath.replace('/', '\\'))
-    # print (mainModulePath.replace('/', '\\'))
+import maya.cmds as cmds
+import maya.mel as mel
+import maya.utils
 
-    import maya.cmds as cmds
-    import maya.mel as mel
+MENU_NAME = "HardSurface_Tools"
+_state = {"root": None}
 
-    # create a new tool disabled menu if one doesn't exist already.
-    if cmds.menu("HardSurface_Tools", exists=True):
-        cmds.deleteUI("HardSurface_Tools")
-    sg_menu = cmds.menu("HardSurface_Tools", label="HardSurface_Tools", parent=mel.eval("$retvalue = $gMainWindow;"))
-    cmds.menuItem(label="HardSurface Toolset", parent=sg_menu, c = command)
 
-def cmdCreator():
-    return OpenMayaMPx.asMPxPtr(createToolset())
+def maya_useNewAPI():
+	pass
 
-def initializePlugin( mobject ):
 
-    ''' Initialize the plug-in when Maya loads it. '''
-    mplugin = OpenMayaMPx.MFnPlugin( mobject )
-    try:
-        mplugin.registerCommand( commandName, cmdCreator() )
-    except:
-        print( 'Failed to register command HS_Tools' )
+def _norm(p):
+	return os.path.abspath(p).replace("\\", "/")
 
-def uninitializePlugin( mobject ):
-    ''' Uninitialize the plug-in when Maya un-loads it. '''
-    mplugin = OpenMayaMPx.MFnPlugin( mobject )
-    try:
-        mplugin.deregisterCommand( commandName )
-    except:
-        print( 'Failed to unregister command HS_Tools' )
+
+def _resolve_root(mobject=None):
+	# 1) normal case: __file__ exists (also when imported as a module by install.py)
+	try:
+		return _norm(os.path.dirname(os.path.dirname(__file__)))
+	except NameError:
+		pass
+	# 2) Maya tells us where the plug-in was loaded from
+	if mobject is not None:
+		try:
+			import maya.api.OpenMaya as om2
+			load_path = om2.MFnPlugin(mobject).loadPath()
+			if load_path:
+				return _norm(os.path.dirname(load_path))
+		except Exception:
+			pass
+	# 3) module registered by install.py (HSTool.mod)
+	try:
+		mod = cmds.getModulePath(moduleName="HSTool")
+		if mod:
+			return _norm(mod)
+	except Exception:
+		pass
+	# 4) already importable
+	for p in sys.path:
+		if p and os.path.isdir(os.path.join(p, "HardSurface_Tool")):
+			return _norm(p)
+	return None
+
+
+def _command(root):
+	return (
+		"import sys\n"
+		"if r'{root}' not in sys.path:\n"
+		"    sys.path.insert(0, r'{root}')\n"
+		"from HardSurface_Tool import HardSurfaceTool\n"
+		"try:\n"
+		"    from importlib import reload\n"
+		"except ImportError:\n"
+		"    pass\n"
+		"reload(HardSurfaceTool)\n"
+		"HardSurfaceTool.GUI()\n"
+	).format(root=root)
+
+
+def _create_menu(*args):
+	root = _state["root"] or _resolve_root()
+	if not root:
+		cmds.warning("HSTool: khong xac dinh duoc thu muc HSTool, hay chay lai install.py")
+		return
+	_state["root"] = root
+	if root not in sys.path:
+		sys.path.insert(0, root)
+	if cmds.menu(MENU_NAME, exists=True):
+		cmds.deleteUI(MENU_NAME)
+	main_window = mel.eval("$tmp = $gMainWindow;")
+	menu = cmds.menu(MENU_NAME, label=MENU_NAME, parent=main_window, tearOff=False)
+	cmds.menuItem(label="HardSurface Toolset", parent=menu, command=_command(root))
+
+
+def initializePlugin(mobject):
+	_state["root"] = _resolve_root(mobject)
+	# Deferred: the main window may not exist yet when Maya autoloads plug-ins at startup
+	maya.utils.executeDeferred(_create_menu)
+
+
+def uninitializePlugin(mobject):
+	try:
+		if cmds.menu(MENU_NAME, exists=True):
+			cmds.deleteUI(MENU_NAME)
+	except Exception:
+		pass
