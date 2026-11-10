@@ -16,6 +16,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import tempfile
 import threading
 import time
@@ -81,12 +82,56 @@ def _get(url, cfg, accept="application/vnd.github+json"):
 	return urlopen(Request(url, headers=_headers(cfg, accept)), timeout=TIMEOUT)
 
 
+def _is_ssl_error(e):
+	reason = getattr(e, "reason", e)
+	try:
+		import ssl
+		if isinstance(reason, ssl.SSLError) or isinstance(e, ssl.SSLError):
+			return True
+	except ImportError:
+		return True  # Python of this Maya has no ssl module at all
+	text = (str(e) + " " + str(reason)).upper()
+	return "SSL" in text or "CERTIFICATE" in text
+
+
+def _curl_path():
+	p = os.path.join(os.environ.get("SystemRoot", "C:\\Windows"), "System32", "curl.exe")
+	return p if os.path.isfile(p) else None
+
+
+def _curl(url, cfg, accept, out_path=None):
+	# Fallback when Python's own SSL fails (corporate proxy / antivirus / broken cert store).
+	# curl.exe (Windows 10+) uses the Windows certificate store + system proxy and STILL verifies certs.
+	curl = _curl_path()
+	if not curl:
+		raise RuntimeError("Loi SSL va may khong co curl.exe (can Windows 10 tro len)")
+	conf = ['header = "{0}: {1}"'.format(k, v) for k, v in _headers(cfg, accept).items()]
+	conf.append('url = "{0}"'.format(url))
+	cmd = [curl, "-sS", "-L", "--fail", "--max-time", "120", "--config", "-"]
+	if out_path:
+		cmd += ["-o", out_path]
+	flags = 0x08000000 if os.name == "nt" else 0  # CREATE_NO_WINDOW
+	p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE, stderr=subprocess.PIPE, creationflags=flags)
+	out, err = p.communicate("\n".join(conf).encode("utf-8"))
+	if p.returncode != 0:
+		raise RuntimeError("curl loi ({0}): {1}".format(p.returncode, err.decode("utf-8", "ignore").strip()))
+	return out
+
+
+def _http_text(url, cfg, accept="application/vnd.github+json"):
+	try:
+		return _get(url, cfg, accept).read().decode("utf-8")
+	except Exception as e:
+		if not _is_ssl_error(e):
+			raise
+		return _curl(url, cfg, accept).decode("utf-8")
+
+
 def fetch_latest_release(cfg):
 	repo = cfg.get("repo", "")
 	if not re.match(r"^[\w.-]+/[\w.-]+$", repo) or repo == "OWNER/REPO":
 		raise RuntimeError("Updater chua duoc cau hinh: hay dien 'repo' trong Updater/update_config.json")
-	resp = _get("https://api.github.com/repos/{0}/releases/latest".format(repo), cfg)
-	rel = json.loads(resp.read().decode("utf-8"))
+	rel = json.loads(_http_text("https://api.github.com/repos/{0}/releases/latest".format(repo), cfg))
 	asset = None
 	sha_asset = None
 	for a in rel.get("assets", []):
@@ -101,7 +146,13 @@ def fetch_latest_release(cfg):
 
 def _download(asset, cfg, dest, progress=None):
 	# API asset url + octet-stream works for both public and private repos
-	resp = _get(asset["url"], cfg, accept="application/octet-stream")
+	try:
+		resp = _get(asset["url"], cfg, accept="application/octet-stream")
+	except Exception as e:
+		if not _is_ssl_error(e):
+			raise
+		_curl(asset["url"], cfg, "application/octet-stream", out_path=dest)
+		return
 	total = int(resp.headers.get("Content-Length", 0) or 0)
 	done = 0
 	with open(dest, "wb") as f:

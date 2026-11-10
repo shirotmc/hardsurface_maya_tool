@@ -69,9 +69,31 @@ Hầu hết check chọn luôn các đối tượng lỗi trong scene để bạ
 - **Modify Object:** Combine, Detach, Clone, Detach By Mat, Center/Reset/Set/Object Pivot.
 - **Scene:** Unhide All, Freeze Transforms, Y/Z, FCC (Force Clean Combine), History, Silhouette.
 - **Instance:** Set Instance, Un-Instance.
-- **Speed Tool:** Edge Length, Straighten, Average, ShrinkWrap, Unbevel, Snap, Cable, Decal, Clear spEdge, Swap LOD, Rename, Screenshot.
+- **Speed Tool:** Edge Length, Straighten, Average, ShrinkWrap, Unbevel, Snap, Cable, Decal, Clear spEdge, Swap LOD, Rename, Screenshot, Material.
 - **Fast Function:** Split Polygon, Extend Face, Fill Face, Match Scale, Reset Object.
 - **Fix Maya**, **Maya - Blender** và **Import/Export:** tiện ích sửa lỗi Maya và trao đổi file với Blender.
+
+### Slide Snap (Model tab, Speed Tool, nút **Snap**)
+Snap các vertex đang chọn lên mặt phẳng của một face bằng cách trượt dọc một đường.
+1. **Pick Face** để chọn face đích, rồi chọn các vertex cần snap.
+2. **Slide Direction:** Along Edge (dọc cạnh của vertex), X, Y, Z hoặc Normal (thẳng góc vào face).
+3. **Snap Vertices**. Vertex không snap được (cạnh song song với mặt, quá xa...) được chọn lại kèm thông báo lý do.
+
+### Material Manager (Model tab, Speed Tool, nút **Material**)
+Cửa sổ riêng để quản lý material, giao diện cùng phong cách với HSTool. Tab **Scene**, **Color Presets** và **ID Map Baker**.
+- **Material List:** tên material (xanh = đang gán cho vùng chọn), ô màu để **gán** vào vùng chọn, ô đánh dấu để chọn nhiều material.
+  Click chọn, Shift chọn dải, Alt bật/tắt, Ctrl chọn các object/face đang dùng material đó.
+- **Create / Edit:** tạo nhanh Lambert, Phong, Blinn, Standard Surface (Ctrl: thêm vào scene, không hỏi tên), nhân bản, Match, đổi tên, xóa.
+  Đổi tên hoặc nhân bản sẽ đổi tên luôn shading group, file và place2d theo material.
+- **Texture Channels:** thêm map Color, Normal, Roughness, Metallic, Specular, Occlusion, Emissive, Opacity cho material;
+  ô xanh báo kênh đang có map, bấm để xóa. **Load Textures From Folder** tự tìm và nối map theo hậu tố tên file (chỉnh ở **Suffixes**).
+- **Color Presets:** 15 màu ID và hơn 50 material mẫu (Brick, Metal_Steel...). Chế độ *Assign to Selection* hoặc *Add to Scene*.
+- **ID Map Baker:** gán màu ID tự động (theo element hoặc object), chọn high / low / cage, rồi bake bản đồ màu ID.
+- **Tools:** UV Border (hard edge theo UV shell), đổi handedness, colorize, material thành vertex color, xóa namespace, tự đặt tên material theo object.
+- **Cleanup:** xóa material không dùng, xóa node thừa, đổi tên đồng bộ, thêm tiền tố `M_`, purge scene.
+
+Dữ liệu preset nằm ở `Material_Tools/Data/mm_material_presets.txt` (một dòng một material, sửa được).
+Material Manager dựa trên bản gốc của Dennis Porter, xem phần Giấy phép bên dưới.
 
 ### Mirror
 - **FLIP / MIRROR / INSTANCE** theo X, Y, Z.
@@ -120,6 +142,13 @@ HSTool/
   HardSurface_Tool/       Cửa sổ chính, Database (setting, hotkey, library, document)
   Check_Tools/ Model_Tools/ Mirror_Tools/ Normal_Tools/ UV_Tools/ BakeSet_Tools/
 ```
+
+## Giấy phép
+
+Phần **Material Manager** (`Material_Tools/`) là bản viết lại bằng Python của
+[Material Manager v5.2.0](https://github.com/Bartalon/Material-Manager) của Dennis Porter, phát hành theo **GNU GPL v3**.
+Do đó phần này (và bản phân phối chứa nó) cũng theo GPL v3. Xem file `LICENSE` và `Material_Tools/NOTICE.md`.
+Các phần còn lại của HSTool không bị ảnh hưởng nếu được tách riêng, nhưng bản phân phối gộp phải tuân thủ GPL v3.
 
 ## Liên hệ
 

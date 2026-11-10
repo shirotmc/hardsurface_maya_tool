@@ -17,6 +17,8 @@ LOCAL_PATH = os.path.dirname(os.path.dirname(os.path.abspath(__file__))).replace
 site.addsitedir(LOCAL_PATH + '/Normal_Tools/Scripts/Python')
 import normal_mel_port
 reload(normal_mel_port)
+import normal_value_copy
+reload(normal_value_copy)
 
 def normalize_vector(vector):
 	vector_length = math.sqrt(sum([e**2 for e in vector]))

@@ -60,7 +60,16 @@ TOOL_VERSION = updater.get_local_version()
 WINDOW_TITLE = "Non-Vehicle Tool " + TOOL_VERSION +  " - Maya " + cmds.about(version=True)
 # WINDOW SIZE
 WINDOW_HEIGHT = 860
-WINDOW_WIDTH = 320
+WINDOW_WIDTH = 325
+# Resizable UI (set False to go back to the old fixed-size window)
+RESIZABLE_UI = True
+MIN_WINDOW_WIDTH = 325
+MIN_WINDOW_HEIGHT = 300
+# Check tab rows: [Check button][gap][Fix button]
+CHECK_ROW_HEIGHT = 30
+CHECK_FIX_WIDTH = 60
+CHECK_FIX_GAP = 5
+CHECK_ROW_RIGHT_MARGIN = 14   # space between the Fix buttons and the scrollbar (kept at every window width)
 
 # TEMPLATE UI
 TEMPLATE_NAME = "HSTemplate"
@@ -78,11 +87,18 @@ CHECK_FRAME_ORDER = [
 	'Clean UP',
 ]
 
+from HardSurface_Tool import ui_resize
+reload(ui_resize)
+cmds = ui_resize.record(cmds)   # remembers rowColumnLayout/columnLayout widths so columns can be scaled
+
 from Check_Tools import CheckTool
 reload(CheckTool)
 
 from Model_Tools import ModelTool
 reload(ModelTool)
+
+from Material_Tools import MaterialTool
+reload(MaterialTool)
 
 from Mirror_Tools import MirrorTool
 reload(MirrorTool)
@@ -182,7 +198,7 @@ def GUI():
 	button_bgc = data['ui']['button_color']
 
 	# Main Window
-	main_window = cmds.window(WINDOW_NAME, title=WINDOW_TITLE, menuBar=True, rtf=True, mnb=False, mxb=False)
+	main_window = cmds.window(WINDOW_NAME, title=WINDOW_TITLE, menuBar=True, rtf=(not RESIZABLE_UI), mnb=False, mxb=False, s=RESIZABLE_UI, cc=save_window_size)
 
 	# Create uiTemplate
 	cmds.uiTemplate(TEMPLATE_NAME)
@@ -209,14 +225,15 @@ def GUI():
 
 	# Main Layout
 	button_form = cmds.formLayout('button_form')
-	main_tab = cmds.tabLayout('main_tablayout', parent = button_form, width=WINDOW_WIDTH+5, cr=True)
+	main_tab = cmds.tabLayout('main_tablayout', parent = button_form, cr=True)
+	cmds.formLayout(button_form, e=True, af=[(main_tab, 'top', 0), (main_tab, 'left', 0), (main_tab, 'right', 0), (main_tab, 'bottom', 0)])
 	
-	check_layout = cmds.rowColumnLayout('Check', parent = main_tab, nc = 1, cw = [(1, WINDOW_WIDTH)])
-	model_layout = cmds.rowColumnLayout('Model', parent = main_tab, nc = 1, cw = [(1, WINDOW_WIDTH)])
-	mirror_layout = cmds.rowColumnLayout('Mirror', parent = main_tab, nc = 1, cw = [(1, WINDOW_WIDTH)])
-	normal_layout = cmds.rowColumnLayout('Normal', parent = main_tab, nc = 1, cw = [(1, WINDOW_WIDTH)])
-	uv_layout = cmds.rowColumnLayout('UV', parent = main_tab, nc = 1, cw = [(1, WINDOW_WIDTH)])
-	bake_layout = cmds.rowColumnLayout('Bake', parent = main_tab, nc = 1, cw = [(1, WINDOW_WIDTH)])
+	check_layout = create_tab_container('Check', main_tab)
+	model_layout = create_tab_container('Model', main_tab)
+	mirror_layout = create_tab_container('Mirror', main_tab)
+	normal_layout = create_tab_container('Normal', main_tab)
+	uv_layout = create_tab_container('UV', main_tab)
+	bake_layout = create_tab_container('Bake', main_tab)
 
 	cmds.tabLayout('main_tablayout', e=True, sti = cmds.optionVar(q='select_tab'), sc='cmds.optionVar(iv=[\'select_tab\', cmds.tabLayout(\'main_tablayout\', q=True, sti=True)])', dcc=detach_tab_to_window)
 
@@ -228,10 +245,13 @@ def GUI():
 	create_bake_tab(bake_layout)
 
 	# Resize
-	cmds.window(main_window, e=True, w=WINDOW_WIDTH, h=WINDOW_HEIGHT)
-	cmds.window(main_window, e=True, s=False)
+	saved_w, saved_h = get_saved_window_size()
+	cmds.window(main_window, e=True, w=saved_w, h=saved_h)
+	cmds.window(main_window, e=True, s=RESIZABLE_UI)
 	# Show
 	cmds.showWindow(main_window)
+	set_window_min_size(main_window)
+	enable_width_scaling(main_window)
 	cmds.scriptJob(e=['SceneOpened', GUI], parent=main_window)
 
 def create_check_tab(check_layout):
@@ -274,7 +294,8 @@ def create_check_tab(check_layout):
 			_pref_frames_sorted.append(f)
 	_rest_frames = sorted([f for f in _unique_frames if f not in _order_pref])
 	all_frame = _pref_frames_sorted + _rest_frames
-	checking_scroll = cmds.scrollLayout('checking_scroll_layout', p=check_layout, cr=True, hst=0, h=WINDOW_HEIGHT - 115)
+	checking_scroll = cmds.scrollLayout('checking_scroll_layout', p=check_layout, cr=True, hst=0)
+	cmds.formLayout(check_layout, e=True, af=[(running_time_frame, 'top', 0), (running_time_frame, 'left', 0), (running_time_frame, 'right', 0), (checking_scroll, 'left', 0), (checking_scroll, 'right', 0), (checking_scroll, 'bottom', 0)], ac=[(checking_scroll, 'top', 0, running_time_frame)])
 	checking_main_frame = cmds.formLayout('checking_main_frame', p=checking_scroll)
 	checking_main_layout = cmds.columnLayout('checking_main_layout', p=checking_main_frame, adj=True, rs=5)
 	cmds.formLayout(checking_main_frame, e=True, af=[(checking_main_layout, 'left', 5), (checking_main_layout, 'right', 5), (checking_main_layout, 'top', 5), (checking_main_layout, 'bottom', 5)])
@@ -287,28 +308,38 @@ def create_check_tab(check_layout):
 		button_layout_position = 0
 		for k,v in iteritems(check_function):
 			if v[0] != None and v[0] == frame:
-				button_layout = cmds.rowColumnLayout(k.replace("Check", "") + "_layout", p=main_button, nc=2, cw=[(1, 230), (2,60)], adj=2, cs=[(2,5)])
+				# One row = formLayout: [ Check button (fills) ][gap][ Fix button (fixed width) ]
+				# Fixed widths are not used for the Check button, so the row fits any window width
+				# and the Fix button always keeps its right margin to the scrollbar.
+				button_layout = cmds.formLayout(k.replace("Check", "") + "_layout", p=main_button, h=CHECK_ROW_HEIGHT)
 				
 				# Set button_layout
-				cmds.formLayout(main_button, e=True, af=[(button_layout, 'left', 5), (button_layout, 'right', 5), (button_layout, 'top', button_layout_position + 5)])
-				button_layout_position += cmds.rowColumnLayout(button_layout, q=True, h=True)
+				cmds.formLayout(main_button, e=True, af=[(button_layout, 'left', 5), (button_layout, 'right', CHECK_ROW_RIGHT_MARGIN), (button_layout, 'top', button_layout_position + 5)])
+				button_layout_position += CHECK_ROW_HEIGHT
 				
 				# Check & Fix Button
 				check_name = k
 				fix_name = k.replace("Check", "Fix")
 
 				# Check Button
-				cmds.button(check_name, l=CheckTool.camelToSpaces(check_name).replace("Check", ""), h=30, p=button_layout, c=partial(execute_check_and_update_time, [v[1]]), bgc=[0.2,0.2,0.2])
+				check_button = cmds.button(check_name, l=CheckTool.camelToSpaces(check_name).replace("Check", ""), h=30, p=button_layout, c=partial(execute_check_and_update_time, [v[1]]), bgc=[0.2,0.2,0.2])
+				cmds.formLayout(button_layout, e=True, af=[(check_button, 'left', 0), (check_button, 'top', 0), (check_button, 'bottom', 0)])
 
-				# Fix Button
+				# Fix Button (the column stays reserved even when a check has no Fix, so all rows line up)
+				fix_button = None
 				for fk, fv in iteritems(fix_function):
 					if fk == fix_name:
-						cmds.button(fix_name, l="Fix", p=button_layout, h=30, c=fv[1], bgc=[0.2,0.2,0.2])
-						break		
+						fix_button = cmds.button(fix_name, l="Fix", p=button_layout, w=CHECK_FIX_WIDTH, h=30, c=fv[1], bgc=[0.2,0.2,0.2])
+						break
+				if fix_button:
+					cmds.formLayout(button_layout, e=True, af=[(fix_button, 'right', 0), (fix_button, 'top', 0), (fix_button, 'bottom', 0)], ac=[(check_button, 'right', CHECK_FIX_GAP, fix_button)])
+				else:
+					cmds.formLayout(button_layout, e=True, af=[(check_button, 'right', CHECK_FIX_WIDTH + CHECK_FIX_GAP)])
 	#endregion
 
 def create_model_tab(model_layout):
-	model_scroll = cmds.scrollLayout('model_scroll',p=model_layout, cr = True, hst=0, vst=0, h=WINDOW_HEIGHT+40)
+	model_scroll = cmds.scrollLayout('model_scroll',p=model_layout, cr = True, hst=0)
+	cmds.formLayout(model_layout, e=True, af=[(model_scroll, 'top', 0), (model_scroll, 'left', 0), (model_scroll, 'right', 0), (model_scroll, 'bottom', 0)])
 	main_model_layout = cmds.columnLayout('frame_column_layout', p=model_scroll, adj=True)
 
 	#region Circle
@@ -354,7 +385,7 @@ def create_model_tab(model_layout):
 	cmds.separator(st='in')
 
 	cmds.rowColumnLayout(nc=2, cw=[(1, 230), (2,70)], adj=2)
-	cmds.intSliderGrp('angle_selection_isg', label='Co-planar Angle:', field=True, cw3 = [90,50,90], minValue=0, maxValue=180, fieldMinValue=0, fieldMaxValue=180, value=5, cc=ModelTool.update_selection_by_normal_angle)
+	cmds.intSliderGrp('angle_selection_isg', label='Co-planar Angle:', field=True, cw3 = [90,50,90], adj = 3, minValue=0, maxValue=180, fieldMinValue=0, fieldMaxValue=180, value=5, cc=ModelTool.update_selection_by_normal_angle)
 	cmds.button('angle_selection_btn', l='Select', c=make_tracked_callback(ModelTool.grow_selection_by_normal_angle, 'Select By Angle', 5.0))
 	cmds.setParent('..')
 
@@ -431,7 +462,7 @@ def create_model_tab(model_layout):
 
 	cmds.rowColumnLayout(nc=4, cw=[(1, 75), (2, 75), (3, 75), (4, 75)], adj=4)
 	cmds.iconTextButton("unbevel_tool_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/unbevel.png", l="Unbevel", ann = "Open Unbevel Tool", c = make_tracked_callback(ModelTool.open_unbevel_tool, "Unbevel Tool", 5.0, WINDOW_NAME))
-	cmds.iconTextButton("snap_tool_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/snap.png", l="Snap", ann = "Open Snap Tool", c = make_tracked_callback(ModelTool.open_snap_tool, "Snap Tool", 5.0, WINDOW_NAME))
+	cmds.iconTextButton("snap_tool_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/snap.png", l="Snap", ann = "Slide Snap: snap vertices onto a face by sliding along edges / axes", c = make_tracked_callback(ModelTool.open_snap_tool, "Slide Snap", 5.0, WINDOW_NAME))
 	cmds.iconTextButton("cable_tool_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/cable.png", l="Cable", ann = "Open Cable Tool", c=make_tracked_callback(ModelTool.open_cable_tool, "Cable Tool", 5.0, WINDOW_NAME))	
 	cmds.iconTextButton("create_decal_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/decal.png", l="Decal", ann = "Open Create Decal Tool", c=make_tracked_callback(ModelTool.open_create_decal_tool, "Create Decal Tool", 5.0, WINDOW_NAME))
 	cmds.setParent('..')
@@ -443,6 +474,12 @@ def create_model_tab(model_layout):
 	cmds.iconTextButton("swap_lod_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/LOD.png", l="Swap LOD", ann = "Open LOD Tool", c = make_tracked_callback(ModelTool.open_lod_tool, "LOD Tool", 5.0, WINDOW_NAME))
 	cmds.iconTextButton("rename_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/rename.png", l="Rename", ann = "Rename Objects", c = make_tracked_callback(ModelTool.open_rename_tool, "Rename Tool", 5.0, WINDOW_NAME))
 	cmds.iconTextButton("screenshot_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/screenshot.png", l="Screenshot", ann = "Open Screenshot Tool", c = make_tracked_callback(ModelTool.open_screenshot_tool, "Screenshot Tool", 5.0, WINDOW_NAME))
+	cmds.setParent('..')
+
+	cmds.separator(st='in')
+
+	cmds.rowColumnLayout(nc=4, cw=[(1, 75), (2, 75), (3, 75), (4, 75)], adj=4)
+	cmds.iconTextButton("material_manager_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/shader.png", l="Material", ann = "Open Material Manager: assign / create / rename materials, texture channels, colour presets, ID map baker", c = make_tracked_callback(MaterialTool.open_tool, "Material Manager", 5.0, WINDOW_NAME))
 	cmds.setParent('..')
 	
 	cmds.separator(st='in')
@@ -613,6 +650,9 @@ def create_normal_tab(normal_layout):
 	cmds.button('toggle_everything_button', l = 'Toggle Everything', h=30, c = make_tracked_callback(NormalTools_Main.toggle_everything_normal, 'Toggle Everything Normal', 5.0))
 	cmds.setParent('..')
 
+	# Normal Value Copy (port of AriNormalValueCopy.mel)
+	NormalTools_Main.normal_value_copy.build_ui(normal_layout)
+
 	copy_paste_normal_frame_layout = cmds.frameLayout('copy_paste_normal_frame_layout', p = normal_layout, l = 'Copy/Paste Normal', collapsable = False, ann = 'Copy/Paste Normal')
 	
 	cmds.rowColumnLayout(p = copy_paste_normal_frame_layout, nc = 3, cw = [(1,105), (2,105), (3,105)], adj=3, cs = [(2,5), (3,5)])
@@ -770,7 +810,7 @@ def create_uv_tab(uv_layout):
 	uvset_frame_layout = cmds.frameLayout("uvset_frame_layout", p = uv_layout, l = "UVSet", collapsable = False, ann = "UVSet") 
 	uvset_layout = cmds.rowColumnLayout("uvset_layout", p = uvset_frame_layout, nc = 2, cw = [(1,210), (2,115)], adj=2, cs = [(1,5)])
 	cmds.textScrollList("uvset_list_textscroll", p = uvset_layout, ams = True, vcc=UVToolsMain.reloadUVSetTextScroll, dcc=UVToolsMain.selectUVSet)
-	uvset_event_btn_layout = cmds.columnLayout("uvset_event_btn_layout", p = uvset_layout, columnAttach=('both', 1), rowSpacing=1)
+	uvset_event_btn_layout = cmds.columnLayout("uvset_event_btn_layout", p = uvset_layout, adj=True, columnAttach=('both', 1), rowSpacing=1)
 	cmds.button("select_object_by_uvset_button", p = uvset_event_btn_layout, l = "Select Objects", h=30, c = make_tracked_callback(UVToolsMain.selectObjectByUVSet, "Select Objects By UVSet", 5.0))
 	cmds.button("set_default_uvset", p = uvset_event_btn_layout, l = "Set Default UVSet", h=30, c = make_tracked_callback(UVToolsMain.setDefaultUVSet, "Set Default UVSet", 5.0))
 	cmds.button("sort_uvset_list", p = uvset_event_btn_layout, l = "Sort UVSet List", h=30, c = make_tracked_callback(UVToolsMain.sortUVSetList, "Sort UVSet List", 5.0))
@@ -887,8 +927,74 @@ def execute_check_and_update_time(check_functions, *args):
 		cmds.textField('checked_time_textfield', e=True, tx='Pending', bgc=[0.35, 0.0, 0.0])
 
 #region UI FUNCTION
+#region RESIZE HELPERS
+def create_tab_container(tab_name, parent):
+	# Every tab content sits in a formLayout so its scroll area can follow the window size.
+	# (A tab is deleted/recreated by this name when it is detached / returned.)
+	if not RESIZABLE_UI:
+		return cmds.rowColumnLayout(tab_name, parent = parent, nc = 1, cw = [(1, WINDOW_WIDTH)])
+	if tab_name in ('Check', 'Model'):
+		# These tabs build their own scrollLayout; the formLayout stretches it to the window
+		return cmds.formLayout(tab_name, parent = parent)
+	# Other tabs stack their frames top to bottom: scroll area named after the tab, content column inside
+	cmds.scrollLayout(tab_name, parent = parent, cr = True, hst = 0)
+	return cmds.columnLayout(adj = True, rs = 0)
+
+def get_saved_window_size():
+	w = cmds.optionVar(q='hs_window_width') if cmds.optionVar(ex='hs_window_width') else WINDOW_WIDTH
+	h = cmds.optionVar(q='hs_window_height') if cmds.optionVar(ex='hs_window_height') else WINDOW_HEIGHT
+	if not RESIZABLE_UI:
+		return WINDOW_WIDTH, WINDOW_HEIGHT
+	return max(int(w), MIN_WINDOW_WIDTH), max(int(h), MIN_WINDOW_HEIGHT)
+
+def save_window_size(*args):
+	try:
+		if RESIZABLE_UI and cmds.window(WINDOW_NAME, ex=True):
+			w = cmds.window(WINDOW_NAME, q=True, w=True)
+			h = cmds.window(WINDOW_NAME, q=True, h=True)
+			if w >= MIN_WINDOW_WIDTH and h >= MIN_WINDOW_HEIGHT:
+				cmds.optionVar(iv=['hs_window_width', int(w)])
+				cmds.optionVar(iv=['hs_window_height', int(h)])
+	except Exception:
+		pass
+
+def enable_width_scaling(window_name):
+	# Phase 2: column widths follow the window width (see ui_resize.py). Original widths = design at MIN width.
+	if not RESIZABLE_UI:
+		return
+	try:
+		ui_resize.reset_window(window_name)
+		if not ui_resize.install(window_name):
+			cmds.warning('HSTool: window width scaling is unavailable (Qt hook failed, see Script Editor)')
+		ui_resize.apply_scale(window_name)
+	except Exception:
+		pass
+
+def set_window_min_size(window_name):
+	# Never allow the window to be smaller than the original design (buttons would be clipped)
+	if not RESIZABLE_UI:
+		return
+	try:
+		try:
+			from PySide2 import QtWidgets
+			from shiboken2 import wrapInstance
+		except ImportError:
+			from PySide6 import QtWidgets
+			from shiboken6 import wrapInstance
+		import maya.OpenMayaUI as omui
+		ptr = omui.MQtUtil.findControl(window_name)
+		if ptr:
+			widget = wrapInstance(int(ptr), QtWidgets.QWidget)
+			top = widget.window()
+			top.setMinimumSize(MIN_WINDOW_WIDTH, MIN_WINDOW_HEIGHT)
+	except Exception:
+		pass
+#endregion
+
 def clear_old_ui():
+	ui_resize.forget()
 	if cmds.window(WINDOW_NAME, ex = True):
+		save_window_size()
 		cmds.deleteUI(WINDOW_NAME, window = True)
 
 	if cmds.window('check_tool_window', ex=True):
@@ -943,7 +1049,7 @@ def return_to_tool_window(tab_name, tab_index):
 	try:
 		global tab_list
 		# Create layout
-		layout = cmds.rowColumnLayout(tab_name, parent = 'main_tablayout', nc = 1, cw = [(1, WINDOW_WIDTH)])
+		layout = create_tab_container(tab_name, 'main_tablayout')
 		# Create Tab
 		create_tab(tab_name, layout)
 
@@ -959,6 +1065,7 @@ def return_to_tool_window(tab_name, tab_index):
 				break
 		# Select Tab
 		cmds.tabLayout('main_tablayout', e=True, sti=index+1)
+		enable_width_scaling(WINDOW_NAME)
 	except:
 		pass
 
@@ -969,16 +1076,18 @@ def detach_tab_to_window(*arg):
 	tab_list.remove(current_tab_index)
 
 	# Delete current tabLayout
-	if cmds.rowColumnLayout(current_tab_name, ex=True):
+	if cmds.layout(current_tab_name, ex=True):
 		cmds.deleteUI(current_tab_name, layout = True)
 	
 	# Create child window
 	child_window_name = current_tab_name.lower() + '_tool_window'
 	child_window_tittle = current_tab_name + ' Tool'
-	child_window = cmds.window(child_window_name, title = child_window_tittle, rtf=True, mnb=False, mxb=False, cc=partial(return_to_tool_window, current_tab_name, current_tab_index))
-	child_layout = cmds.columnLayout(current_tab_name, p=child_window, adj=True, rs = 5, w=WINDOW_WIDTH)
+	child_window = cmds.window(child_window_name, title = child_window_tittle, rtf=(not RESIZABLE_UI), mnb=False, mxb=False, s=RESIZABLE_UI, w=WINDOW_WIDTH, h=WINDOW_HEIGHT, cc=partial(return_to_tool_window, current_tab_name, current_tab_index))
+	child_layout = create_tab_container(current_tab_name, child_window)
 	create_tab(current_tab_name, child_layout)
 	cmds.showWindow(child_window)
+	set_window_min_size(child_window)
+	enable_width_scaling(child_window)
 
 def change_user_runtime_command_file():
 	# Read root user command data

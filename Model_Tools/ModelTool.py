@@ -43,6 +43,8 @@ import selection_cleanup_port
 reload(selection_cleanup_port)
 import straight_line_tool
 reload(straight_line_tool)
+import slide_snap
+reload(slide_snap)
 
 #region SUPPORT FUNCTION
 
@@ -1278,64 +1280,6 @@ def edges_to_curve(*arg):
 #endregion
 
 #region Snap function
-
-def pick_source_object_to_snap(*arg):
-	selected_source = cmds.ls(sl=True)[0]
-	if len(selected_source) == 0:
-		cmds.confirmDialog(icn = 'warning', m = 'Please select source object!')
-	else:
-		cmds.textField('snap_object_tf', e=True, tx=str(selected_source))
-
-def snap_vertex(source_vertex, dst_vertex, threshold):
-	for i in range(0, len(dst_vertex)):
-		shortest_distance = 1000000
-		vertex_position = cmds.xform(dst_vertex[i], q=True, ws=True, t=True)
-		for j in range(0,len(source_vertex)):
-			test_vertex = cmds.xform(source_vertex[j], q=True, ws=True, t=True)
-			test_length = ((test_vertex[0] - vertex_position[0])*(test_vertex[0] - vertex_position[0])) + ((test_vertex[1] - vertex_position[1])*(test_vertex[1] - vertex_position[1])) + ((test_vertex[2] - vertex_position[2])*(test_vertex[2] - vertex_position[2]))
-			if test_length < shortest_distance:
-				closest_vertex = source_vertex[j]
-				shortest_distance = test_length
-		if shortest_distance < threshold:
-			source_position = cmds.xform(closest_vertex, q=True, ws=True, t=True) 
-			cmds.xform(dst_vertex[i], ws=True, t=(source_position[0], source_position[1], source_position[2])) 
-
-def snap_selected_to_source_object(*arg):
-	threshold = cmds.floatField('snap_threshold_ff', q=True, v=True)
-	selected_list = cmds.ls(sl=True, l=True, fl=True)
-	cmds.select(cl=True)
-
-	object_type = cmds.nodeType(selected_list[len(selected_list)-1])
-	if (object_type == "transform"):
-		selected_vertex = []
-		for i in range(0, len(selected_list) - 1):
-			selected_vertex.append(selected_list[i])
-		cmds.select(selected_list[len(selected_list)-1])
-		mel.eval('ConvertSelectionToVertices;')
-		vertex_source = cmds.ls(sl=True, fl=True, l=True)
-		snap_vertex(vertex_source, selected_vertex, threshold)
-		cmds.select(selected_vertex, r=True)
-	elif object_type != "transform":
-		selected_vertex = []
-		for i in range(0, len(selected_list)):
-			selected_vertex.append(selected_list[i])
-		source_object = cmds.textField('snap_object_tf', q=True, tx=True)
-		cmds.select(source_object)
-		mel.eval('ConvertSelectionToVertices;')
-		vertex_source = cmds.ls(sl=True, fl=True, l=True)
-		snap_vertex(vertex_source, selected_vertex, threshold)
-		cmds.select(selected_vertex, r=True)
-
-def snap_selected_to_itself(*arg):
-	selected_vertex = cmds.ls(sl=True, fl=True, l=True)
-	selected_object = cmds.textField('snap_object_tf', q=True, tx=True)
-	cmds.select(selected_object)
-	mel.eval("ConvertSelectionToVertices;")
-	vertex_source = cmds.ls(sl=True, fl=True, l=True)
-	cmds.select(cl=True)
-	vertex_source = list(set(vertex_source) - set(selected_vertex))
-	threshold = cmds.floatField('snap_threshold_ff', q=True, v=True)
-	snap_vertex(vertex_source, selected_vertex, threshold)
 
 #endregion
 
@@ -3790,30 +3734,7 @@ def open_create_decal_tool(parent_window):
 	cmds.showWindow('create_decal_window')
 
 def open_snap_tool(parent_window):
-	if cmds.window('snap_tool_window', ex = True):
-		cmds.deleteUI('snap_tool_window', window = True)
-	cmds.window('snap_tool_window', title = 'Snap Tool', p=parent_window, rtf = True, mnb = False, mxb = False)
-	
-	cmds.rowColumnLayout('snap_tool_layout', nr = 2, rh = [(1,30), (2,40)], adj = 2, cs = [(2,5)])
-
-	cmds.rowColumnLayout(nc=3, cw=[(1, 100), (2, 105), (3, 105)], adj=3, cs=[(2,5), (3,5)])
-	cmds.text('Source Object:')
-	cmds.textField('snap_object_tf', ed=False, tx='')
-	cmds.button(l = 'Pick Source', c=pick_source_object_to_snap)
-	cmds.setParent('..')
-
-	cmds.rowColumnLayout(nc = 3, cw = [(1, 105), (2, 105), (3,100)], adj = 3, cs = [(2,5), (3,5)])
-	cmds.button(l = 'Snap Other', bgc = (0.2, 0.8, 0.5), c=snap_selected_to_source_object)
-	cmds.button(l = 'Snap Itself', bgc = (0.8, 0.5, 0), c=snap_selected_to_itself)
-	cmds.columnLayout(columnAttach=('both', 0), rs=5, adj=True)
-	cmds.text('Threshold:')
-	cmds.floatField('snap_threshold_ff', min=0.1, max=1000, v=100)
-	cmds.setParent('..')
-	cmds.setParent('..')
-	
-	cmds.setParent('..')
-
-	cmds.showWindow('snap_tool_window')	
+	slide_snap.open_tool(parent_window)
 
 def open_unbevel_tool(parent_window):
 	if cmds.window('unbevel_tool_window', ex = True):
