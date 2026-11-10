@@ -687,7 +687,6 @@ def build_presets_tab(parent):
 	cmds.formLayout(form, e=True, af=[(label, 'left', 4), (label, 'top', 5), (mode, 'top', 0), (mode, 'right', 2), (mode, 'bottom', 0)],
 	                ac=[(mode, 'left', 6, label)])
 	cmds.frameLayout(l='Color ID Swatches', cll=False, p=col, mw=4, mh=4)
-	flow = cmds.flowLayout(wr=True, cs=4, rs=4)
 	for entry in swatches:
 		rgb = data.preset_color(entry)
 		cmds.button(l='', w=24, h=24, bgc=rgb, ann='%s (%s)' % (entry['name'], entry['type']), c=_guard(_bind(on_preset, entry)))
