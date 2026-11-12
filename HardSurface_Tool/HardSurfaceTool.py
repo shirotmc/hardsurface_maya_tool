@@ -1241,7 +1241,7 @@ def open_hs_tool_document(*arg):
 	os.system('start ' + DOCUMENT_PATH)
 
 def show_contact_information(*arg):
-	cmds.confirmDialog(icn="information", m = "Contact: Canh Tran (canhtran@virtuosgames.com)")
+	cmds.confirmDialog(icn="information", m = "Contact: Canh Tran (shiro.tmc@gmail.com)")
 
 def robocopy(source, des):
 	#source is list full file name or folder
