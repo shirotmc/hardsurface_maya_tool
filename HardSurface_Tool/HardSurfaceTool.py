@@ -464,7 +464,7 @@ def create_model_tab(model_layout):
 	cmds.iconTextButton("unbevel_tool_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/unbevel.png", l="Unbevel", ann = "Open Unbevel Tool", c = make_tracked_callback(ModelTool.open_unbevel_tool, "Unbevel Tool", 5.0, WINDOW_NAME))
 	cmds.iconTextButton("snap_tool_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/snap.png", l="Snap", ann = "Slide Snap: snap vertices onto a face by sliding along edges / axes", c = make_tracked_callback(ModelTool.open_snap_tool, "Slide Snap", 5.0, WINDOW_NAME))
 	cmds.iconTextButton("cable_tool_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/cable.png", l="Cable", ann = "Open Cable Tool", c=make_tracked_callback(ModelTool.open_cable_tool, "Cable Tool", 5.0, WINDOW_NAME))	
-	cmds.iconTextButton("create_decal_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/decal.png", l="Decal", ann = "Open Create Decal Tool", c=make_tracked_callback(ModelTool.open_create_decal_tool, "Create Decal Tool", 5.0, WINDOW_NAME))
+	cmds.iconTextButton("material_manager_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/shader.png", l="Material", ann = "Open Material Manager: assign / create / rename materials, texture channels, colour presets, ID map baker", c = make_tracked_callback(MaterialTool.open_tool, "Material Manager", 5.0, WINDOW_NAME))
 	cmds.setParent('..')
 
 	cmds.separator(st='in')
@@ -477,13 +477,6 @@ def create_model_tab(model_layout):
 	cmds.setParent('..')
 
 	cmds.separator(st='in')
-
-	cmds.rowColumnLayout(nc=4, cw=[(1, 75), (2, 75), (3, 75), (4, 75)], adj=4)
-	cmds.iconTextButton("material_manager_button", style = "iconAndTextVertical", image1 = LOCAL_PATH + "/Model_Tools/Icons/shader.png", l="Material", ann = "Open Material Manager: assign / create / rename materials, texture channels, colour presets, ID map baker", c = make_tracked_callback(MaterialTool.open_tool, "Material Manager", 5.0, WINDOW_NAME))
-	cmds.setParent('..')
-	
-	cmds.separator(st='in')
-
 
 	cmds.setParent('..')
 	#endregion
