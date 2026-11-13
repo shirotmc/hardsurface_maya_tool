@@ -10,6 +10,8 @@ Each vertex moves along a line until it meets the face:
 The vertex always lands on the PLANE of the target face (the face's border is not a limit).
 The maths lives in slide_snap_core.py (pure python, unit tested); this file only talks to Maya.
 """
+import re
+
 import maya.cmds as cmds
 import maya.api.OpenMaya as om
 
@@ -59,23 +61,38 @@ def _dag_from_name(name):
 	return sel.getDagPath(0)
 
 
+_COMPONENT = re.compile(r'^(?P<node>.+)\.(?P<kind>vtx|e|f)\[(?P<a>\d+)(?::(?P<b>\d+))?\]$')
+
+
+def _shape_path(node):
+	"""Full path of the mesh shape of a transform / shape name."""
+	if cmds.objectType(node) == 'mesh':
+		return (cmds.ls(node, l=True) or [node])[0]
+	shapes = cmds.listRelatives(node, s=True, f=True, type='mesh', ni=True) or []
+	return shapes[0] if shapes else None
+
+
 def _selection():
-	"""Selected components: ({(path, vertex id)}, {(path, edge id)}, [(path, face id)]) with path = full dag path."""
+	"""Selected components: ([(path, vertex id)], [(path, edge id)], [(path, face id)]) with path = full shape path.
+
+	Read with cmds.ls: MGlobal.getActiveSelectionList() keeps only ONE component type per mesh when vertices and
+	edges are selected together (multi selection mode), so the edges would silently be lost."""
 	verts, edges, faces = [], [], []
-	sel = om.MGlobal.getActiveSelectionList()
-	for i in range(sel.length()):
-		dag, comp = sel.getComponent(i)
-		if comp.isNull():
+	shape_cache = {}
+	for item in cmds.ls(sl=True, fl=False, l=True) or []:
+		m = _COMPONENT.match(item)
+		if not m:
 			continue
-		path = dag.fullPathName()
-		fn = om.MFnSingleIndexedComponent(comp)
-		t = comp.apiType()
-		if t == om.MFn.kMeshVertComponent:
-			verts += [(path, v) for v in fn.getElements()]
-		elif t == om.MFn.kMeshEdgeComponent:
-			edges += [(path, e) for e in fn.getElements()]
-		elif t == om.MFn.kMeshPolygonComponent:
-			faces += [(path, f) for f in fn.getElements()]
+		node = m.group('node')
+		if node not in shape_cache:
+			shape_cache[node] = _shape_path(node)
+		path = shape_cache[node]
+		if not path:
+			continue
+		first = int(m.group('a'))
+		last = int(m.group('b')) if m.group('b') is not None else first
+		target = {'vtx': verts, 'e': edges, 'f': faces}[m.group('kind')]
+		target += [(path, i) for i in range(first, last + 1)]
 	return verts, edges, faces
 
 
