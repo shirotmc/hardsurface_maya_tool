@@ -1064,7 +1064,7 @@ def _build_material_controls(parent):
 		                    c=_guard(_bind(on_quick_material, node_type)))
 	cmds.iconTextButton(style='textOnly', l='Other shader...', h=34, bgc=DARK, ann="Maya's list of all shader types", c=_guard(on_custom_material))
 	cmds.setParent(parent)
-	cmds.rowColumnLayout(nc=5, adj=1, cs=[(i, 3) for i in range(2, 6)], p=parent)
+	cmds.rowColumnLayout(nc=6, adj=1, cs=[(i, 3) for i in range(2, 6)], p=parent)
 	spec = (('refresh', 'mat_reload', 'Refresh the material list', refresh_list),
 	        ('duplicate', 'mat_duplicate', 'Duplicate the marked materials (with their textures)', on_duplicate),
 	        ('match', 'mat_match', 'Select the objects / faces that use the marked materials.\nCtrl + click: invert "match only in selection".', on_match),
